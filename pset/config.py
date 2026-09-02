@@ -29,6 +29,12 @@ BUILD = 'problems_pdf'
 
 README = 'README_pset.md'
 
+# The generated file holding the macro contract, written to a repo root by
+# --init and inputted by every document.  Shipped as a repo file rather
+# than a .sty because \usepackage searches the working folder and not its
+# parent, so a root-level .sty is invisible to a document in hw1/.
+MECHANISM = 'pset.tex'
+
 
 class RepoError(Exception):
     """No problem repo was found to work in."""

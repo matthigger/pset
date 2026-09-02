@@ -14,7 +14,8 @@ Four jobs, one per module:
     usage     which problems each assignment used, and which none did
 
 config holds the lookups they share, all of them a walk up the folder
-tree, and example writes a working repo to copy the layout from.  See
+tree, and example writes the packaged files a repo needs: pset.tex,
+which carries the macro contract, and the example repo around it.  See
 README.md for the command line and docs/points.md for the point config.
 """
 
@@ -22,11 +23,11 @@ from ._version import __version__
 from .build import build_pdf, is_document, resolve, uses_macro
 from .cli import main
 from .config import find_config, find_repo
-from .example import scaffold
+from .example import init, scaffold
 from .library import browse
 from .points import sum_points
 from .usage import usage
 
-__all__ = ['browse', 'build_pdf', 'find_config', 'find_repo', 'is_document',
-           'main', 'resolve', 'scaffold', 'sum_points', 'usage',
-           'uses_macro', '__version__']
+__all__ = ['browse', 'build_pdf', 'find_config', 'find_repo', 'init',
+           'is_document', 'main', 'resolve', 'scaffold', 'sum_points',
+           'usage', 'uses_macro', '__version__']

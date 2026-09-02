@@ -1,6 +1,6 @@
 [project]
 name = "pset"
-version = "0.5.0"
+version = "0.6.0"
 description = "Build assignments from a repo of LaTeX problems, each carrying its own solution and rubric."
 readme = "README.md"
 requires-python = ">=3.9"

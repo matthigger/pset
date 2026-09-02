@@ -24,8 +24,9 @@ problems/                  every problem, grouped by topic
         2s_comp_overflow01.tex
     logic/
         boolean_simplify01.tex
+pset.tex                   \prob, \sol, \rub, \stud (generated)
 packages.tex               shared by every assignment
-command.tex                defines \prob, \sol, \rub, \stud
+command.tex                your styling, inputs pset.tex
 hw1/
     hw1.tex                metadata, then the problems it inputs
 ```
@@ -91,21 +92,23 @@ different subset of them switched on.
 `\sol` and `\rub` are hidden by default and revealed by their own build.
 `\stud` is the reverse: on by default and dropped from both keys.
 
+You do not write those definitions.  `pset --init` generates them into a
+`pset.tex` at your repo root, and each document inputs it beside whatever
+other shared preamble it already has:
+
 ```latex
-\newcommand{\sol}[1]{}
-\newcommand{\rub}[1]{}
-\newcommand{\stud}[1]{#1}
-
-\ifdefined\showsol
-  \renewcommand{\sol}[1]{#1}
-  \renewcommand{\stud}[1]{}
-\fi
-
-\ifdefined\showrub
-  \renewcommand{\rub}[1]{#1}
-  \renewcommand{\stud}[1]{}
-\fi
+\input{../pset.tex}
 ```
+
+The path is relative to the document being built, not to the file holding
+the line, so putting it in a `command.tex` that every document already
+inputs wires up the whole repo at once.  `--init` prints the line rather
+than editing your documents, and re-running it upgrades the file in place
+(it refuses to touch a `pset.tex` it did not write).
+
+Generating it is not just convenience.  Hand-rolled, the definitions are
+easy to get subtly wrong, and the failure mode is a student PDF with the
+answers in it.
 
 ```latex
 Find the decision boundary.
@@ -126,6 +129,27 @@ a tear-off answer sheet.
 Note it wraps content rather than switching a mode, so it takes an argument
 like the other two: `\stud{...}`, not `\begin{stud}`.  Nesting works, so
 `\sol{... \rub{...}}` puts a per-part rubric inside the answer.
+
+## Styling them
+
+`pset.tex` carries the mechanism, which is pset's, and leaves the look to
+you through three hooks.  They default to printing their argument plainly,
+so the generated file needs no packages at all and cannot collide with
+your package set.  Redefine any of them after the `\input`:
+
+```latex
+\renewcommand{\solstyle}[1]{
+  \begin{tcolorbox}[colback=blue!3!white,title=Solution,breakable]#1\end{tcolorbox}}
+
+\renewcommand{\rubstyle}[1]{
+  \begin{tcolorbox}[colback=green!3!white,title=Rubric,breakable]#1\end{tcolorbox}}
+
+\renewcommand{\probstyle}[2]{\section*{Problem #1 #2}}
+```
+
+`\probstyle` takes the number and the title separately.  `\prob` itself is
+mechanism, not taste: `-p` reads the points out of `\prob{[20 pts]: title}`,
+so the macro name is part of the contract even though its look is yours.
 
 The flags pset defines are `\showsol` and `\showrub`, deliberately not
 `\sol` and `\rub`.  A document cannot both define a macro and ask whether
@@ -204,14 +228,18 @@ When the patterns do not fit, pset says so and links to
 Points are read from the source, so `-p` still reports on a document that
 failed to build.
 
-## A readme for your repo
+## Setting up a repo
 
 ```bash
-pset --readme
+pset --init            # write pset.tex, print the line that inputs it
+pset --readme          # write README_pset.md beside problems/
+pset --example         # or scaffold a whole working repo from scratch
 ```
 
-writes `README_pset.md` beside your `problems/` folder: a short guide to
-the layout and the commands, for whoever clones the repo next.
+`--init` is the one an existing repo needs; it writes `pset.tex` and
+nothing else, since a repo with assignments in it already has a layout and
+a preamble, and neither is pset's to rewrite.  `--readme` adds a short
+guide to the layout and commands for whoever clones the repo next;
 `--example` offers one too, and remembers the answer in
 `~/.config/pset/pset.toml` so it only asks once.
 

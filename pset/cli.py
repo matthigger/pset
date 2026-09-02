@@ -14,8 +14,9 @@ import sys
 from ._version import __version__
 from .build import (MACROS_DEFAULT, build_pdf, latex_error, resolve,
                     uses_macro)
-from .config import README, RepoError, find_config, find_repo
-from .example import scaffold, write_readme
+from .config import (MECHANISM, PROBLEMS, README, RepoError,
+                     find_config, find_repo)
+from .example import init, scaffold, write_readme
 from .library import browse
 from .points import PointsError, sum_points
 from .usage import usage
@@ -54,6 +55,10 @@ def parse_args(argv=None) -> argparse.Namespace:
                            'assignment uses, and the reverse')
     repo.add_argument('-o', '--out', default=None,
                       help='where --usage writes')
+    repo.add_argument('--init', action='store_true',
+                      help=f'write {MECHANISM} (the \\sol / \\rub / '
+                           f'\\stud / \\prob definitions) to the repo '
+                           f'root, and print the line that inputs it')
     repo.add_argument('--example', nargs='?', const='', metavar='DIR',
                       help='write an example problem repo to DIR '
                            '(default pset_example/) and stop')
@@ -125,11 +130,18 @@ def run_repo(args: argparse.Namespace) -> int:
     try:
         root = find_repo()
     except RepoError as error:
-        print(error, file=sys.stderr)
-        return 1
+        # --init is how a repo gets the problems/ folder find_repo looks
+        # for, so it must not be the thing that demands one already.
+        if not args.init:
+            print(error, file=sys.stderr)
+            return 1
+        root = pathlib.Path.cwd()
+        print(f'no {PROBLEMS}/ folder found, setting up {root} anyway')
 
     failed = []
-    if args.readme:
+    if args.init:
+        init(root, readme=args.readme or None)
+    elif args.readme:
         written = write_readme(root)
         print(f'wrote {written}' if written
               else f'{root / README} exists already, left alone')
@@ -161,10 +173,10 @@ def main(argv=None) -> None:
             sys.exit(str(error))
         sys.exit(0)
 
-    if args.browse or args.usage or args.readme:
+    if args.browse or args.usage or args.readme or args.init:
         if args.path:
-            sys.exit('--browse, --usage and --readme act on the whole repo '
-                     'and take no documents')
+            sys.exit('--init, --browse, --usage and --readme act on the '
+                     'whole repo and take no documents')
         sys.exit(run_repo(args))
 
     if not args.path:

@@ -17,6 +17,7 @@ every platform.
 """
 
 import glob
+import os
 import pathlib
 import re
 import subprocess
@@ -129,12 +130,23 @@ def uses_macro(path: pathlib.Path, macro: str) -> Optional[bool]:
             read and the macro is absent from all of it.
     """
     use = re.compile(rf'\\{macro}\s*\{{')
-    seen, stack = set(), [pathlib.Path(path)]
+    path = pathlib.Path(path)
+
+    # Every \input resolves against the folder pdflatex runs in, which is
+    # the document's own, and nesting does not move that base: an \input
+    # inside a repo-root command.tex is still read relative to hw1/, not
+    # to command.tex.  Resolving against the including file instead
+    # happens to agree for hw1/hw1.tex naming ../packages.tex, and
+    # disagrees the moment a file one level up does the naming.
+    base = path.parent
+
+    seen, stack = set(), [path]
     found = blind = False
     while stack:
         current = stack.pop()
         if not current.suffix:
             current = current.with_suffix('.tex')
+        current = pathlib.Path(os.path.normpath(current))
         if current in seen:
             continue
         seen.add(current)
@@ -147,7 +159,7 @@ def uses_macro(path: pathlib.Path, macro: str) -> Optional[bool]:
             if '\\' in target:
                 blind = True
             else:
-                stack.append(current.parent / target)
+                stack.append(base / target)
 
     if found:
         return True
