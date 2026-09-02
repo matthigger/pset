@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Build the student, solution and rubric PDFs of a LaTeX assignment.
 
-One .tex source carries all three copies: the \\sol and \\rub macros mark
-the parts only the answer key and the grading rubric should show, and each
-copy is a pdflatex run that defines a different subset of them.  All three
-are built unless --no-sol or --no-rub says otherwise.
+One .tex source carries all three copies.  The \\sol and \\rub macros mark
+what only the answer key and the rubric show, \\stud what only the student
+copy shows, and each build is a pdflatex run defining \\showsol, \\showrub
+or neither.  The flags are deliberately not named \\sol and \\rub: a
+document cannot both define a macro and test whether it is defined, and
+the collision would silently leak answers onto the student copy.  All
+three copies are built unless --no-sol or --no-rub says otherwise.
 
 Arguments are files, globs or directories, resolved here rather than left
 to the shell, so quiz1* reaches quiz1a and quiz1b on every platform.  Two
@@ -19,7 +22,6 @@ documents, since how a count is written varies by repo (see find_config).
 
 import argparse
 import glob
-import importlib.util
 import pathlib
 import re
 import subprocess
@@ -37,17 +39,25 @@ DOCUMENTCLASS = re.compile(r'^\s*\\documentclass', re.MULTILINE)
 
 CONFIG_NAME = 'solrub.toml'
 
-# How a point count is written is a property of the repo, not of this
-# tool: [20 pts (8, 12)] and [20 points (6 pts each)] are both in use.
-# A [points] table in solrub.toml overrides these per repo.
+# The LaTeX \prob{[20 pts (8, 12)]: title} convention, which is all these
+# defaults describe.  Notably absent is 'points': sum-pts already matches
+# both "20 pts" and "20 points", and pinning it narrower is how a repo
+# silently undercounts itself.  Keys are sum-pts' own parameter names, so
+# a [points] table in solrub.toml reaches every knob it has.
 POINTS_DEFAULT = {
     'left': r'\[',
     'right': r'\]',
     'prefix': r' *\\prob',
-    'points': 'pts?',
-    'remove': [r'\(\d+.?\d* each\)', r'\((\d+.?\d*,? ?)+\)',
-               r'\{', r'\}', ':'],
+    'rm_list': [r'\(\d+.?\d* each\)', r'\((\d+.?\d*,? ?)+\)',
+                r'\{', r'\}', ':'],
 }
+
+POINTS_HELP = ('https://github.com/matthigger/solrub'
+               '/blob/main/docs/points.md')
+
+
+class PointsError(Exception):
+    """The point-counting patterns did not fit the document."""
 
 
 def build_pdf(path: pathlib.Path, jobname: str = None, sol: bool = False,
@@ -58,8 +68,8 @@ def build_pdf(path: pathlib.Path, jobname: str = None, sol: bool = False,
     Args:
         path: the .tex file, suffix optional
         jobname: output basename, defaults to the input's
-        sol: define \\sol, revealing the answers
-        rub: define \\rub, revealing the rubric (needs sol too)
+        sol: define \\showsol, revealing the answers
+        rub: define \\showrub, revealing the rubric (needs sol too)
         clean: delete the aux, out and log files afterwards.  A failed
             run keeps them either way, since the log holds the error.
         quiet: swallow the pdflatex transcript.  The error survives on
@@ -79,9 +89,10 @@ def build_pdf(path: pathlib.Path, jobname: str = None, sol: bool = False,
     if jobname:
         command += ['--jobname', jobname]
     if sol and rub:
-        command += ['\\def\\sol{1} \\def\\rub{1} \\input{' + path.name + '}']
+        command += ['\\def\\showsol{1} \\def\\showrub{1} '
+                    '\\input{' + path.name + '}']
     elif sol:
-        command += ['\\def\\sol{1} \\input{' + path.name + '}']
+        command += ['\\def\\showsol{1} \\input{' + path.name + '}']
     else:
         command += [path.name]
 
@@ -113,30 +124,43 @@ def find_config(path: pathlib.Path) -> dict:
 
 
 def sum_points(path: pathlib.Path) -> None:
-    """Print the point total of a document.
+    """Print the point total of a document, per problem.
 
-    Reads the [points] table of the repo's solrub.toml, which names the
-    regexes that find a count; POINTS_DEFAULT fills in whatever it omits.
-    A repo writing [20 points] rather than [20 pts] must say so, or the
-    count silently skips those problems.
+    The [points] table of the repo's solrub.toml is handed straight to
+    sum-pts, so its parameter names are the keys and its own defaults
+    cover anything both that table and POINTS_DEFAULT leave out.  Calling
+    sum-pts here rather than as a subprocess is what makes pt_split
+    reachable, since its command line never exposed that one.
 
     Raises:
-        SystemExit: the optional sum-pts dependency is not installed
+        SystemExit: sum-pts is not installed
+        PointsError: the patterns matched nothing, or sum-pts choked on
+            them.  Any exception counts: a pattern that does not fit
+            surfaces as a regex error, a missing digit or a duplicate
+            problem name depending on where it first goes wrong, and the
+            reader needs the same advice for all of them.
     """
-    if importlib.util.find_spec('sum_pts') is None:
+    try:
+        import sum_pts
+    except ModuleNotFoundError:
         sys.exit('summing points needs sum-pts: pip install "solrub[pts]"')
 
     points = {**POINTS_DEFAULT, **find_config(path).get('points', {})}
 
-    command = [
-        sys.executable, '-m', 'sum_pts', f"{path}",
-        '--left', points['left'], '--right', points['right'],
-        '--points', points['points'], '--prefix', points['prefix'],
-    ]
-    for pattern in points['remove']:
-        command += ['-r', pattern]
+    counter = sum_pts.PointCounter()
+    try:
+        counter.parse_file(file=path, **points)
+    except Exception as error:
+        raise PointsError(
+            f'{type(error).__name__}: {error}\n'
+            f'the [points] patterns do not fit {path}, see {POINTS_HELP}')
 
-    subprocess.run(command, check=True)
+    if counter.df.empty:
+        raise PointsError(
+            f'found no points in {path}\n'
+            f'the [points] patterns do not fit it, see {POINTS_HELP}')
+
+    print(counter.to_df().to_markdown())
 
 
 def latex_error(transcript: str, lines: int = 12) -> str:
@@ -278,8 +302,8 @@ def main() -> None:
         if args.pts:
             try:
                 sum_points(path)
-            except subprocess.CalledProcessError:
-                print(f'could not count points in {path}', file=sys.stderr)
+            except PointsError as error:
+                print(error, file=sys.stderr, flush=True)
 
     if failed:
         names = ', '.join(str(path) for path in failed)

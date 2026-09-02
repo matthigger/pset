@@ -1,6 +1,6 @@
 [project]
 name = "solrub"
-version = "0.2.0"
+version = "0.3.0"
 description = "Build the student, solution and rubric PDFs of a LaTeX assignment."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -17,6 +17,11 @@ classifiers = [
 ]
 
 dependencies = ["tomli>=2.0 ; python_version < '3.11'"]
+
+[project.urls]
+Homepage = "https://github.com/matthigger/solrub"
+Documentation = "https://github.com/matthigger/solrub/blob/main/docs/points.md"
+Issues = "https://github.com/matthigger/solrub/issues"
 
 [project.optional-dependencies]
 pts = ["sum-pts>=0.0.4"]

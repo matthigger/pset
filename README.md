@@ -39,58 +39,67 @@ the end and the exit status is non-zero.  `-v` restores the full transcript.
 ## Counting points
 
 `-p` sums the points per problem, using
-[sum-pts](https://pypi.org/project/sum-pts/): `pip install "solrub[pts]"`.
+[sum-pts](https://github.com/matthigger/sum_pts): `pip install "solrub[pts]"`.
 
-How a count is written varies by repo, so the patterns live beside the
-documents rather than in this tool.  Drop a `solrub.toml` at the root of a
-problem repo and it governs every assignment under it:
-
-```toml
-# problems read:  \prob{[20 pts (8, 12)]: Bayes Net}
-[points]
-left = '\['
-right = '\]'
-prefix = ' *\\prob'
-points = 'pts?'
-remove = ['\(\d+.?\d* each\)', '\((\d+.?\d*,? ?)+\)', '\{', '\}', ':']
+```
+solrub -p quiz1a
 ```
 
-Anything omitted keeps its default, so a repo writing `[20 points]` rather
-than `[20 pts]` needs only:
+The default expects a bracket at the front of a `\prob{...}` title, and
+reads both spellings:
+
+```latex
+\prob{[20 pts (8, 12)]: Bayes Net}
+\prob{[16 points (4 pts each)]: Ecology System}
+```
+
+If that is not your convention, a `[points]` table in a `solrub.toml` at your
+repo root overrides it for every document underneath.  The keys are sum-pts'
+own parameters, so its documentation is the reference:
 
 ```toml
 [points]
-points = 'points'
+prefix = ' *\\question'
+points = '(marks|pts?)'
 ```
 
-That one is worth stating explicitly: the default `pts?` does not match
-`points`, and rather than failing it matches the `pts` inside a
-`(4 pts each)` split, silently returning a total that is too low.
-
-Points are counted from the source, so `-p` still reports on a document
-that failed to build.
+When the patterns do not fit, solrub says so and links to
+[docs/points.md](docs/points.md), which explains each key and the traps.
+Points are read from the source, so `-p` still reports on a document that
+failed to build.
 
 ## In the document
 
-Three macros divide the source.  `\answer` and `\rubric` are hidden by
-default and revealed by their build; `\exam` is the reverse, student-only
-content such as the blank space left for the work, dropped from both keys.
+Three macros divide the source.  `\sol` and `\rub` are hidden by default and
+revealed by their own build; `\stud` is the reverse, student-only content
+such as the blank space left for the work, dropped from both keys.
 
 ```latex
-\newcommand{\answer}[1]{}
-\newcommand{\rubric}[1]{}
-\newcommand{\exam}[1]{#1}
+\newcommand{\sol}[1]{}
+\newcommand{\rub}[1]{}
+\newcommand{\stud}[1]{#1}
 
-\ifdefined\sol
-  \renewcommand{\answer}[1]{#1}
-  \renewcommand{\exam}[1]{}
+\ifdefined\showsol
+  \renewcommand{\sol}[1]{#1}
+  \renewcommand{\stud}[1]{}
 \fi
 
-\ifdefined\rub
-  \renewcommand{\rubric}[1]{#1}
-  \renewcommand{\exam}[1]{}
+\ifdefined\showrub
+  \renewcommand{\rub}[1]{#1}
+  \renewcommand{\stud}[1]{}
 \fi
 ```
+
+```latex
+\stud{\vfill}
+\sol{The boundary is $x = 3$.}
+\rub{6 pts: correct slope.  3 pts if the intercept is off.}
+```
+
+The flags solrub defines are `\showsol` and `\showrub`, deliberately not
+`\sol` and `\rub`.  A document cannot both define a macro and ask whether
+it is defined: `\newcommand{\sol}` would make `\ifdefined\sol` true on
+every build, so the student copy would silently print the answers.
 
 ## Requires
 
