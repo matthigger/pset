@@ -16,10 +16,29 @@ pip install solrub
 solrub quiz1a              # quiz1a.pdf, quiz1a_sol.pdf, quiz1a_rub.pdf
 solrub quiz1*              # every version at once
 solrub quiz1/              # every document in a folder
-solrub --no-sol --no-rub blank
 ```
 
-All three copies are the default; `--no-sol` and `--no-rub` opt out.
+All three copies are the default, minus any that would come out empty: a
+document with no `\rub` anywhere in it gets no rubric copy, since that copy
+would only duplicate the answer key.  It says so when it skips one.
+
+    ==> exam1a.tex
+        exam1a.pdf  exam1a_sol.pdf
+        no \rub in it, rub copy skipped
+
+The check follows `\input` through the whole tree, because the content
+macros usually sit in the problem files rather than the document.  Where the
+tree cannot be read to the end — a missing file, or an `\input` whose path
+is built from a macro — it builds the copy rather than guess.  `--rub` forces
+one, `--no-rub` refuses it outright, and the same pair exists for `--sol`.
+
+If your repo calls the macros something else, name them in `solrub.toml`:
+
+```toml
+[macros]
+sol = 'answer'
+rub = 'rubric'
+```
 
 Arguments are files, globs or directories, with the `.tex` suffix optional.
 Globs are expanded by the tool rather than left to the shell, so `quiz1*`

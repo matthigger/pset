@@ -6,8 +6,11 @@ what only the answer key and the rubric show, \\stud what only the student
 copy shows, and each build is a pdflatex run defining \\showsol, \\showrub
 or neither.  The flags are deliberately not named \\sol and \\rub: a
 document cannot both define a macro and test whether it is defined, and
-the collision would silently leak answers onto the student copy.  All
-three copies are built unless --no-sol or --no-rub says otherwise.
+the collision would silently leak answers onto the student copy.
+
+All three are built unless --no-sol or --no-rub refuses one, or the
+document carries none of that content, in which case the copy would
+only duplicate another and is skipped (see uses_macro).
 
 Arguments are files, globs or directories, resolved here rather than left
 to the shell, so quiz1* reaches quiz1a and quiz1b on every platform.  Two
@@ -29,6 +32,7 @@ import sys
 import warnings
 from collections.abc import Iterator
 from importlib.metadata import PackageNotFoundError, version
+from typing import Optional
 
 try:
     import tomllib
@@ -45,6 +49,12 @@ except PackageNotFoundError:
 DOCUMENTCLASS = re.compile(r'^\s*\\documentclass', re.MULTILINE)
 
 CONFIG_NAME = 'solrub.toml'
+
+INPUT = re.compile(r'\\input\{([^}]*)\}')
+
+# Names of the content macros, overridable through [macros] in
+# solrub.toml for a repo that calls them something else.
+MACROS_DEFAULT = {'sol': 'sol', 'rub': 'rub'}
 
 # The LaTeX \prob{[20 pts (8, 12)]: title} convention, which is all these
 # defaults describe.  Notably absent is 'points': sum-pts already matches
@@ -208,6 +218,51 @@ def is_document(path: pathlib.Path) -> bool:
     return bool(DOCUMENTCLASS.search(path.read_text(errors='ignore')))
 
 
+def uses_macro(path: pathlib.Path, macro: str) -> Optional[bool]:
+    """Report whether a document uses a macro, following its \\input tree.
+
+    The content macros live in the problem files a document pulls in
+    rather than in the document itself, so the whole tree has to be read:
+    an exam naming no \\rub of its own may still input eight problems
+    that do.
+
+    Args:
+        path: the .tex file
+        macro: the name without its backslash, e.g. rub
+
+    Returns:
+        used: True if found.  None where the tree could not be read to
+            the end, either a missing file or an \\input whose path is
+            assembled from a macro, since a document that might use it
+            has to be built anyway.  False only when the whole tree was
+            read and the macro is absent from all of it.
+    """
+    use = re.compile(rf'\\{macro}\s*\{{')
+    seen, stack = set(), [pathlib.Path(path)]
+    found = blind = False
+    while stack:
+        current = stack.pop()
+        if not current.suffix:
+            current = current.with_suffix('.tex')
+        if current in seen:
+            continue
+        seen.add(current)
+        if not current.is_file():
+            blind = True
+            continue
+        text = current.read_text(errors='ignore')
+        found = found or bool(use.search(text))
+        for target in INPUT.findall(text):
+            if '\\' in target:
+                blind = True
+            else:
+                stack.append(current.parent / target)
+
+    if found:
+        return True
+    return None if blind else False
+
+
 def expand(pattern: str) -> Iterator[pathlib.Path]:
     """Yield the candidate files one command-line argument names.
 
@@ -266,9 +321,15 @@ def main() -> None:
         description='Build the student, solution and rubric PDFs of a '
                     'LaTeX assignment.')
     parser.add_argument('-s', '--sol', action=argparse.BooleanOptionalAction,
-                        default=True, help='build solution copy')
+                        default=None,
+                        help='build solution copy, or --no-sol never.  '
+                             'Left alone it builds unless the document '
+                             'has no \\sol content')
     parser.add_argument('-r', '--rub', action=argparse.BooleanOptionalAction,
-                        default=True, help='build rubric copy')
+                        default=None,
+                        help='build rubric copy, or --no-rub never.  '
+                             'Left alone it builds unless the document '
+                             'has no \\rub content')
     parser.add_argument('-p', '--pts', action='store_true', help='sum points')
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='show the pdflatex transcript')
@@ -292,19 +353,27 @@ def main() -> None:
 
         # One unbuildable document must not strand the rest of the batch,
         # so collect the failures and report them together at the end.
+        macros = {**MACROS_DEFAULT, **find_config(path).get('macros', {})}
+        skipped = []
         try:
             built = [build_pdf(path, quiet=not args.verbose)]
 
-            if args.sol:
-                built.append(build_pdf(path, jobname=f'{path.stem}_sol',
-                                       sol=True, quiet=not args.verbose))
-
-            if args.rub:
-                built.append(build_pdf(path, jobname=f'{path.stem}_rub',
-                                       sol=True, rub=True,
+            for kind, asked in (('sol', args.sol), ('rub', args.rub)):
+                if asked is False:
+                    continue
+                # Asked for outright, build it; left to us, skip the copy
+                # a document with none of that content would duplicate.
+                if asked is None and uses_macro(path, macros[kind]) is False:
+                    skipped.append(kind)
+                    continue
+                built.append(build_pdf(path, jobname=f'{path.stem}_{kind}',
+                                       sol=True, rub=kind == 'rub',
                                        quiet=not args.verbose))
 
             print('    ' + '  '.join(pdf.name for pdf in built), flush=True)
+            for kind in skipped:
+                print(f'    no \\{macros[kind]} in it, {kind} copy skipped',
+                      flush=True)
         except subprocess.CalledProcessError as error:
             failed.append(path)
             if error.stdout:
