@@ -26,6 +26,7 @@ import pathlib
 import re
 import subprocess
 import sys
+import warnings
 from collections.abc import Iterator
 from importlib.metadata import PackageNotFoundError, version
 
@@ -146,8 +147,14 @@ def sum_points(path: pathlib.Path) -> None:
             problem name depending on where it first goes wrong, and the
             reader needs the same advice for all of them.
     """
+    # sum-pts 0.0.4 writes its regex defaults as plain strings, so
+    # compiling it warns three times about invalid escapes.  That is its
+    # to fix, but the noise would land in output this tool promises to
+    # keep quiet, and it only appears until the .pyc is cached.
     try:
-        import sum_pts
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', SyntaxWarning)
+            import sum_pts
     except ModuleNotFoundError:
         sys.exit('summing points needs sum-pts: pip install "solrub[pts]"')
 
