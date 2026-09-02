@@ -32,17 +32,35 @@ later (`base_convert01.tex`, then `base_convert02.tex`).  Write only the
 body: no `\documentclass`, no `\begin{document}`, since the assignment
 supplies both.  Three macros divide the content.
 
-    \stud{\vfill}
-
     Convert 635 from decimal to binary.
+
+    \stud{\vfill}
 
     \sol{$635 = (1001111011)_2$}
 
     \rub{3 pts for the answer, 3 for the work.}
 
-`\sol` shows only in the solution and rubric copies, `\rub` only in the
-rubric, and `\stud` only in the student copy: it is where the blank space
-left for the work goes, which nobody wants in an answer key.
+Each copy is that one source with a different subset switched on:
+
+| macro | student | `_sol` | `_rub` | what goes in it |
+|-------|---------|--------|--------|-----------------|
+| plain text | yes | yes | yes | the question |
+| `\stud` | yes | | | space for the work |
+| `\sol` | | yes | yes | the answer |
+| `\rub` | | | yes | how to mark it |
+
+So `\sol` shows only in the solution and rubric copies and `\rub` only in
+the rubric.  `\stud` runs the other way: it is the student-only content,
+dropped from both keys.  Mostly that is the blank space left for the work,
+`\stud{\vfill}` or `\stud{\vspace{2in}}` after the question, which the
+answer key does not want: leave it in and every answer sits alone on its
+own page, so grading one problem means paging through five sheets.
+Anything else addressed only to the student goes in it too, such as
+`\stud{Show your work.}` or a table to fill in.
+
+All three wrap their content rather than switching a mode, so each takes
+an argument: `\stud{...}`, not `\begin{stud}`.  They nest, so
+`\sol{... \rub{...}}` hangs a per-part rubric off the answer it belongs to.
 
 Two conventions keep the paths workable.  Write the `.tex` suffix in every
 `\input{}`, so an editor can follow the reference, and give each

@@ -78,9 +78,18 @@ the end and the exit status is non-zero.  `-v` restores the full transcript.
 
 ## In the document
 
-Three macros divide the source.  `\sol` and `\rub` are hidden by default and
-revealed by their own build; `\stud` is the reverse, student-only content
-such as the blank space left for the work, dropped from both keys.
+Three macros divide the source, and each copy is the same document with a
+different subset of them switched on.
+
+| macro | student | `_sol` | `_rub` | what goes in it |
+|-------|---------|--------|--------|-----------------|
+| plain text | yes | yes | yes | the question |
+| `\stud` | yes | | | space for the work |
+| `\sol` | | yes | yes | the answer |
+| `\rub` | | | yes | how to mark it |
+
+`\sol` and `\rub` are hidden by default and revealed by their own build.
+`\stud` is the reverse: on by default and dropped from both keys.
 
 ```latex
 \newcommand{\sol}[1]{}
@@ -99,10 +108,24 @@ such as the blank space left for the work, dropped from both keys.
 ```
 
 ```latex
+Find the decision boundary.
+
 \stud{\vfill}
 \sol{The boundary is $x = 3$.}
 \rub{6 pts: correct slope.  3 pts if the intercept is off.}
 ```
+
+`\stud` exists because the student copy and the answer key want opposite
+things in the same spot.  The student needs room to work, so a problem ends
+with `\stud{\vfill}` or `\stud{\vspace{2in}}`; the key wants that space
+gone, or every answer sits alone on its own page and the grader pages
+through five sheets to mark one problem.  Anything else addressed only to
+the student belongs in it too: `\stud{Show your work.}`, a fill-in table,
+a tear-off answer sheet.
+
+Note it wraps content rather than switching a mode, so it takes an argument
+like the other two: `\stud{...}`, not `\begin{stud}`.  Nesting works, so
+`\sol{... \rub{...}}` puts a per-part rubric inside the answer.
 
 The flags pset defines are `\showsol` and `\showrub`, deliberately not
 `\sol` and `\rub`.  A document cannot both define a macro and ask whether
