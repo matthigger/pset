@@ -27,13 +27,19 @@ import re
 import subprocess
 import sys
 from collections.abc import Iterator
+from importlib.metadata import PackageNotFoundError, version
 
 try:
     import tomllib
 except ModuleNotFoundError:
     import tomli as tomllib
 
-__version__ = '0.2.0'
+# read from the installed metadata rather than repeating the number here,
+# where it drifts from pyproject.toml the first time one of them is bumped
+try:
+    __version__ = version('solrub')
+except PackageNotFoundError:
+    __version__ = '0+unknown'
 
 DOCUMENTCLASS = re.compile(r'^\s*\\documentclass', re.MULTILINE)
 
