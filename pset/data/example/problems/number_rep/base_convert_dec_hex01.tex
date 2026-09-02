@@ -1,0 +1,77 @@
+\begin{enumerate}[i]
+
+    \item Convert the number 635 from decimal to binary using Euclid's Division Algorithm.
+
+    \sol{
+        \begin{align*}
+            635 = 317 * 2 + 1& \\
+            317 = 158* 2 +1& \\
+            158 = 79* 2 +0& \\
+            79 = 39* 2 +1& \\
+            39 = 19* 2 +1& \\
+            19 = 9* 2 +1& \\
+            9 = 4* 2 +1& \\
+            4 = 2* 2 +0& \\
+            2 = 1* 2 +0& \\
+            1 = 0* 2 +1&
+        \end{align*}
+        so that $635 = (1001111011)_2$
+    }
+    \rub{
+        \begin{itemize}
+            \item 3 pt correct final answer (-1 per bit to min 0)
+            \item 3 pt work shown via Euclid's Division Algorithm which clearly yields final answer
+        \end{itemize}
+    }
+
+    \item Convert the binary number $(01110101)_2$ to decimal.
+    Show an intermediate step which shows each powers of two to be added.
+
+    \sol{
+        $(01110101)_2 = 64+32+16+4+1 = 117$
+    }
+
+    \rub{
+        \begin{itemize}
+            \item 3 pt correct final answer (-1 per bit to min 0)
+            \item 3 pt work shown which clearly yields final answer (needn't be our solution exactly)
+        \end{itemize}
+    }
+
+    \item Convert the decimal number 111 to base 16 (hexadecimal) using Euclid's Division Algorithm.
+
+    \sol{
+        \begin{align*}
+            111 &= 6* 16 +15 \\
+            6 &= 0* 16 +6
+        \end{align*}
+        so that $111 = (6F)_{16}$ (remember that $15 = (F)_{16}$)
+    }
+
+    \rub{
+        \begin{itemize}
+            \item 3 pt correct final answer (-1 per bit to min 0)
+            \item 3 pt work shown via Euclid's Division Algorithm which clearly yields final answer
+        \end{itemize}
+    }
+
+
+    \item Solve for the decimal value $x$:\\
+    $(1AB)_{16} = (x)_{10}$
+
+    \sol{
+        \begin{align*}
+        (1AB)
+            _{16} &= B * 16^0 + A * 16 ^ 1 + 1 * 16^2 \\
+            &= 11 * 1 + 10 * 16 + 256 \\
+            &= 427
+        \end{align*}
+    }
+
+    \rub{
+        \begin{itemize}
+            \item 3 pt correct final answer (-1 per bit to min 0)
+            \item 3 pt work shown which clearly yields final answer (needn't be our solution exactly)
+        \end{itemize}
+    }
+\end{enumerate}

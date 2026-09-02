@@ -1,0 +1,52 @@
+% typical blue underlined hyperrefs
+\hypersetup{pdfborder={0 0 0}, urlcolor=blue, colorlinks=true}
+
+% \sol and \rub print only in their own build; \stud only outside
+% them.  pset sets \showsol / \showrub to pick the build.
+\newcommand{\sol}[1]{}
+\newcommand{\rub}[1]{}
+\newcommand{\stud}[1]{#1}
+
+% answer key: show \sol, drop the student-only \stud
+\ifdefined\showsol
+	\renewcommand{\sol}[1]{
+		\begin{tcolorbox}[colback=blue!3!white,colframe=blue!40!black,title=Solution,breakable]
+			#1
+		\end{tcolorbox}
+	}
+	\renewcommand{\stud}[1]{}
+\fi
+
+% rubric copy: show \rub, drop the student-only \stud
+\ifdefined\showrub
+	\renewcommand{\rub}[1]{
+		\begin{tcolorbox}[colback=green!3!white,colframe=green!40!black,title=Rubric,breakable]
+			#1
+		\end{tcolorbox}
+	}
+	\renewcommand{\stud}[1]{}
+\fi
+
+% define header
+\def\myboxA#1{\vbox{\hrule height0.8pt\hbox{\vrule width0.8pt\kern1pt
+			\vbox{\kern1pt#1\kern1pt}\kern1pt\vrule width0.8pt}\hrule height0.8pt}}
+
+\def\myboxB#1{\vbox{\hrule height0.8pt\hbox{\vrule width0.8pt\kern2pt
+			\vbox{\kern2pt#1\kern2pt}\kern2pt\vrule width0.8pt}\hrule height0.8pt}}
+
+\def\titlebox#1{\myboxA{\myboxB{\vbox{\hsize \textwidth \noindent #1}}}}
+
+\def\headerDate#1{\centerline{\titlebox{%
+			\course \hfill  \prof \linebreak
+			\semester \hfill \hwdateassign}}}
+
+% problem
+\newcounter{probcount}
+\newcommand{\prob}[1]{\stepcounter{probcount} \bigskip \par \noindent { \textbf{Problem \arabic{probcount} #1} \\ }}
+
+% fighere
+\providecommand{\fighere}[2]{
+	\begin{figure}[H]
+		\centering
+		\includegraphics[#1]{#2}
+	\end{figure}}

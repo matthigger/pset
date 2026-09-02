@@ -1,0 +1,88 @@
+For each of the equations below, find \textbf{every} $x$ which satisfies the equality.
+If there are infinitely many $x$ which satisfy an equality, you may find it helpful to list them out in a sequence whose pattern is obvious (e.g. $\{4, 7, 10, 13, 16, \hdots \}$)
+
+\begin{enumerate}[i]
+	\item $11 \mod 3 = x$
+
+	      \sol{$x = 2$}
+
+	      \rub{
+		      \begin{itemize}
+			      \item 4 pts, all or nothing
+		      \end{itemize}
+	      }
+
+	\item $8 \mod 4 = x$
+
+	      \sol{$x = 0$}
+
+	      \rub{
+		      \begin{itemize}
+			      \item 4 pts if correct
+			      \item 2 pts if x = 4 is given
+		      \end{itemize}
+	      }
+
+	\item $x \mod 4 = 1$
+
+	      \sol{$x$ may be any of $\{ \hdots -3, 1, 5, 9, \hdots \}$}
+
+	      \rub{
+		      \begin{itemize}
+			      \item 2 pts if solution shows multiple values are possible
+			      \item 1 pts if solution contain a value which is correct
+			      \item 1 pt if solution contains all possible values
+		      \end{itemize}
+	      }
+
+	\item $x \mod 5 = 3$
+
+	      \sol{$x$ may be any of $\{ \hdots -7, -2, 3, 8, 13, 18 \hdots \}$}
+
+	      \rub{
+		      \begin{itemize}
+			      \item 2 pts if solution shows multiple values are possible
+			      \item 1 pts if solution contain a value which is correct
+			      \item 1 pt if solution contains all possible values
+		      \end{itemize}
+	      }
+
+	\item This extra credit part has two equalities to compute x for:
+	      \begin{align*}
+		      (145 + 174) \mod 17 = x \\
+		      (145 \mod 17) + (174 \mod 17) = x
+	      \end{align*}
+
+	      These problems suggest a rule, identify and justify why this rule is True.
+
+	      \sol{$x=13$ for both!  Maybe its the case that:
+		      \begin{equation}
+			      (n \mod c)
+			      + (m \mod c) \stackrel{?}{=} (n + m \mod c)
+		      \end{equation}
+		      (We use the question marks equals sign to note that we're suggesting this equality but we're not quite sure its right.)
+		      In this case, something isn't quite right.
+		      Consider:
+		      \begin{equation*}
+			      (9 \mod 10)
+			      + (8 \mod 10 )= 9 + 8 = 17 \neq (9 + 8 \mod 10) = 17 \mod 10 = 7
+		      \end{equation*}
+		      The trouble is that the left side of our first equation outputs a value which might be larger than $c$ but the right side could never do this.
+		      This statement might have some merit though, we just add one more $\mod c$ on the left to fix the problem above:
+		      \begin{equation*}
+			      ((n \mod c) + (m \mod c)) \mod c = (n + m \mod c)
+		      \end{equation*}
+
+		      The statement above is a bit verbose, but the exercise is hinting that there is a whole different "addition" in a world of numbers $\mod c$ which corresponds to addition as we typically know it.
+	      }
+
+	      \rub{
+		      As with all extra credit, be tough here.
+		      \begin{itemize}
+			      \item .5 pt if x=13 is shown
+			      \item .5 pt if reasonable conjecture is made n + m mod c = n mod c + m mod c ... which isn't quite correct
+			      \item 1 pt if nuance in solution (extra mod operation) is given
+			      \item no justification is necessary, but feel free to write a note to students about their thinking
+		      \end{itemize}
+	      }
+\end{enumerate}

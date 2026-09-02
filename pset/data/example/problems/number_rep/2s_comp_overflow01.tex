@@ -1,0 +1,93 @@
+\begin{enumerate}[i]
+	\item Give the 8-bit two's complement representations of
+	      the following decimal values: $55$, $83$, $-79$, $-88$.
+	      Give some justification with responses for any negative values.
+
+	      \sol{
+
+		      The positive values are the same as the unsigned binary:
+		      \begin{center}
+			      \begin{math}
+				      \begin{array}{ccccc}
+					      55 & = & 32+16+4+2+1 & = & 00110111 \\
+					      83 & = & 64+16+2+1   & = & 01010011 \\
+				      \end{array}
+			      \end{math}
+		      \end{center}
+
+		      To make the remaining values negative, we'll need to activate that leading bit which adds $-2^7$ to our value (see solution immediately above). So that the sum of all digits is -79 we must have $-128 + x = -79 \rightarrow x = 49$. That is, the 7 rightward bits must sum to 49. Written as an 8 bit unsigned value $49 = (00110001)_2$ so that $-79 = (10110001)_2$ in 2's complement.
+
+		      Similarly,
+		      \begin{equation*}
+			      -128 + x = -88 \rightarrow x = 40 = (00101000)_2 \rightarrow -88 = (10101000)_2 \text{ in 2's complement}
+		      \end{equation*}
+
+	      }
+
+	      \rub{
+		      For each of the positive values (55, 83):
+		      \begin{itemize}
+			      \item 2 pts final correct answer (no work needs to be shown)
+		      \end{itemize}
+
+		      For each of the negative values (-79, -88):
+
+		      \begin{itemize}
+			      \item 3 pts final correct answer (-1 per bit wrong, no credit if the leading bit is not 1)
+			      \item 2 pts some justification shown (some computation as shown in solution or flip all bits \& add one is acceptable)
+		      \end{itemize}
+
+	      }
+
+	\item Compute the following operations as a computer would, directly from the (8-bit) 2's complement representations: $-79 + 55$, $-79 - 88$, and $83 + 55$.
+	      Indicate whether each operation results in an overflow or not.
+
+	      \emph{Note:\/} Use the two's complement representations from part~ii above.
+
+	      \sol{
+		      \begin{center}
+			      \begin{math}
+				      \begin{array}{cccccccccccr}
+					        &  & 1 & 0^1 & 1^1 & 1 & 0^1 & 0^1 & 0^1 & 1 & = & -79 \\
+					      + &  & 0 & 0   & 1   & 1 & 0   & 1   & 1   & 1 & = & 55  \\
+					      \hline
+					        &  & 1 & 1   & 1   & 0 & 1   & 0   & 0   & 0 & = & -24
+				      \end{array}
+			      \end{math}
+			      There is \textbf{no overflow}
+		      \end{center}
+
+
+		      \begin{center}
+			      \begin{math}
+				      \begin{array}{cccccccccccr}
+					        &  & 1 & 0^1 & 1 & 1 & 0 & 0 & 0 & 1 & =    & -79 \\
+					      + &  & 1 & 0   & 1 & 0 & 1 & 0 & 0 & 0 & =    & -88 \\
+					      \hline
+					        &  & 0 & 1   & 0 & 1 & 1 & 0 & 0 & 1 & \neq & 89
+				      \end{array}
+			      \end{math}
+			      There is an \textbf{overflow}
+		      \end{center}
+
+		      \begin{center}
+			      \begin{math}
+				      \begin{array}{cccccccccccr}
+					        &  & 0^1 & 1^1 & 0^1 & 1 & 0^1 & 0^1 & 1^1 & 1 & =    & 83   \\
+					      + &  & 0   & 0   & 1   & 1 & 0   & 1   & 1   & 1 & =    & 55   \\
+					      \hline
+					        &  & 1   & 0   & 0   & 0 & 1   & 0   & 1   & 0 & \neq & -118
+				      \end{array}
+			      \end{math}
+			      There is an \textbf{overflow}
+		      \end{center}
+
+	      }
+	      \rub{
+		      For each problem:
+		      \begin{itemize}
+			      \item 1 pt addition is completely correct
+			      \item 2 pt overflow or not correctly given
+		      \end{itemize}
+	      }
+\end{enumerate}

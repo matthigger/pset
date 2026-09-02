@@ -1,12 +1,12 @@
 # Writing a point-counting config
 
-`solrub -p` sums the points per problem by handing your document to
+`pset -p` sums the points per problem by handing your document to
 [sum-pts](https://github.com/matthigger/sum_pts). If you got here from an
 error message, the patterns it was given did not fit your document.
 
-## What solrub assumes by default
+## What pset assumes by default
 
-Out of the box solrub expects the points to sit in a bracket at the front of
+Out of the box pset expects the points to sit in a bracket at the front of
 a `\prob{...}` title:
 
     \prob{[20 pts (8, 12)]: Bayes Net}
@@ -36,7 +36,7 @@ which already matches `pt`, `pts`, `point` and `points` in either case.
 
 ## Overriding them
 
-Put a `solrub.toml` at the root of your problem repo. It applies to every
+Put a `pset.toml` at the root of your problem repo. It applies to every
 document underneath, so one file per repo is normally enough.
 
 ```toml
@@ -81,7 +81,7 @@ points = '(pts|marks)'    # right
 
 ## Checking a config
 
-`solrub -p` prints the table it derived, so the fastest check is to run it on
+`pset -p` prints the table it derived, so the fastest check is to run it on
 one document you know the total of. A count that comes back suspiciously low
 usually means a pattern matched something narrower than you meant — the
 totals are not validated against anything, so nothing will complain for you.

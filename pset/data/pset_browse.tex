@@ -1,0 +1,27 @@
+% Template for `pset --browse`, which wraps every problem in one topic
+% folder into a document and builds it.  Copy it to pset_browse.tex at
+% your repo root to change the layout; pset fills in the four ALL-CAPS
+% placeholders and writes the result into problems_pdf/.
+\documentclass[11pt]{article}
+
+% A repo's packages.tex and command.tex expect these; \providecommand so
+% a repo whose own template already sets them keeps its values.
+\providecommand{\hwtitle}{HW_TITLE}
+\providecommand{\hwdateassign}{DATE_BUILD}
+\providecommand{\hwdatedue}{}
+\providecommand{\prof}{}
+\providecommand{\course}{}
+\providecommand{\semester}{}
+
+PREAMBLE
+
+\begin{document}
+    \begin{center}
+        \Large \textbf{\hwtitle}
+
+        \normalsize \hwdateassign
+    \end{center}
+
+PROBLEMS
+
+\end{document}

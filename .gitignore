@@ -1,6 +1,16 @@
+# Python
 __pycache__/
-*.py[cod]
+*.pyc
 *.egg-info/
-build/
 dist/
-.pytest_cache/
+build/
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.pdf
+!pset/data/**/*.pdf
+
+# scratch
+pset_example/

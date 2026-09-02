@@ -1,0 +1,20 @@
+Simplify the expression below.
+Your simplified expression should have the least possible number of set operators ($\cup$, $\cap$, $^c$).
+Show each step by applying and labelling the identity used (e.g. DeMorgan, Indempotent).
+
+\begin{equation*}
+	(A \cap (A \cup B^c))^c
+\end{equation*}
+
+\stud{\vfill}
+
+\sol{
+
+	\begin{align*}
+		(A \cap (A \cup B^c))^c
+		 & = (A^c \cup (A \cup B^c)^c) \quad \text{(De Morgan's Law)}    \\
+		 & = (A^c \cup (A^c \cap B^{cc})) \quad \text{(De Morgan's Law)} \\
+		 & = (A^c \cup (A^c \cap B)) \quad \text{(Double Negation)}      \\
+		 & = A^c \quad \text{(Absorption)}
+	\end{align*}
+}

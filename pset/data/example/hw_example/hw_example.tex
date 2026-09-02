@@ -1,0 +1,36 @@
+% An assignment carries only its metadata and the list of problems it
+% pulls in; every problem lives in its own file under ../problems.
+\documentclass[11pt]{article}
+
+\newcommand{\hwtitle}{HW1: Number Representation \& Logic}
+\newcommand{\hwdateassign}{Sept 15, 2025}
+\newcommand{\hwdatedue}{Sept 22, 2025 @ 11:59pm}
+\newcommand{\prof}{Prof Example}
+\newcommand{\course}{Example Course}
+\newcommand{\semester}{Fall 2025}
+
+\input{../packages.tex}
+\input{../command.tex}
+
+
+\begin{document}
+    \input{../header_box.tex}
+
+    \input{../instructions.tex}
+
+    \prob{[24 pts: (6 each)]: Base conversions}
+    \input{../problems/number_rep/base_convert_dec_hex01.tex}
+
+    \prob{[23 pts: (14, 9)]: 2's Complement \& Overflow}
+    \input{../problems/number_rep/2s_comp_overflow01.tex}
+
+    \prob{[16 pts: (4, 4, 4, 4) + 2 extra]: Modular Arithmetic}
+    \input{../problems/number_rep/mod_arithmetic01.tex}
+
+    \prob{[12 pts]: Simplifying a set expression}
+    \input{../problems/logic/boolean_simplify01.tex}
+
+    \prob{[10 pts: (5 each)]: CNF \& DNF warmup}
+    \input{../problems/logic/cnf_dnf_warmup01.tex}
+
+\end{document}
